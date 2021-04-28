@@ -1,8 +1,9 @@
 import firebase from "firebase/app";
 import "firebase/auth";
 import "firebase/firestore";
-import { functions } from "firebase";
+import "firebase/functions";
 import "firebase/storage"
+import 'cors';
 
 var firebaseConfig = {
   apiKey: "AIzaSyDgZ8UZ0mySA3qTtlj3tJ1OZleyDAsuw84",
@@ -21,6 +22,8 @@ export const auth = firebase.auth();
 export const firestore = firebase.firestore();
 
 export const storage = firebase.storage();
+
+export const get_user_by_request = firebase.functions().httpsCallable('get_user_by_request');
 
 const provider = new firebase.auth.GoogleAuthProvider();
 export const signInWithGoogle = () => {

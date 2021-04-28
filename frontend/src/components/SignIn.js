@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 //import { Router, Link, Redirect } from "@reach/router";
-import { signInWithGoogle } from "../firebase";
+import { signInWithGoogle, get_user_by_request } from "../firebase";
 import { auth } from "../firebase";
 import ProfilePage from "./ProfilePage";
 import Avatar from '@material-ui/core/Avatar';
@@ -16,8 +16,7 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
-
-
+import Geolocation from 'react-native-geolocation-service';
 
 const SignIn = () => {
 
@@ -45,6 +44,46 @@ const SignIn = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState(null);
+
+    const putBloodRequest = (event)=>{
+
+      Geolocation.getCurrentPosition(
+        (position) => {
+
+          const body = {
+            anonymous: true,
+            face_signature: null,
+            victim_id: null,
+            timestamp: new Date().getTime(),
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          }
+
+          fetch('https://us-central1-bloodbankasaservice.cloudfunctions.net/get_user_by_request',{
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(body)
+          }).then(response =>{
+            return response.text();
+          }).then(data =>{
+            console.log(data)
+          }).catch(error => {
+            console.log(error)
+          });
+
+        },  
+        (error) => {
+          console.log(error.code, error.message);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 100000
+        }
+      );
+    }
 
     const signInWithEmailAndPasswordHandler = (event,email, password) => {
         
@@ -123,6 +162,17 @@ const SignIn = () => {
           >
             Sign In
           </Button>
+
+          <Button
+            fullWidth
+            variant="contained"
+            // style={{color : 'red'}}
+            className={classes.submit}
+            onClick = {(event) => {putBloodRequest(event)}}
+          >
+            Urgent Blood Request
+          </Button>
+
           <Grid container>
             <Grid item xs>
               <Link href="passwordReset" variant="body2">
