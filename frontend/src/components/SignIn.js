@@ -45,6 +45,8 @@ const SignIn = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState(null);
 
+    const [requestMessage, setRequestMessage] = useState('');
+
     const putBloodRequest = (event)=>{
 
       Geolocation.getCurrentPosition(
@@ -68,7 +70,8 @@ const SignIn = () => {
           }).then(response =>{
             return response.text();
           }).then(data =>{
-            console.log(data)
+            // console.log(data)
+            setRequestMessage(data)
           }).catch(error => {
             console.log(error)
           });
@@ -172,6 +175,9 @@ const SignIn = () => {
           >
             Urgent Blood Request
           </Button>
+
+        <TextField fullWidth
+           value={requestMessage}></TextField>
 
           <Grid container>
             <Grid item xs>
