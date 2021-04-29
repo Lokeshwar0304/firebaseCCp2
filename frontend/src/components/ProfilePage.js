@@ -8,17 +8,23 @@ import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
 import Icon from '@material-ui/core/Icon';
 import Geolocation from 'react-native-geolocation-service';
-import { generateUserRequest } from "../firebase";
+import { generateUserRequest,getUserRequestLocationData } from "../firebase";
+import MapContainer from "./MapContainer";
 
 const ProfilePage = () => {
 
   function processRequest(currentRequest)
   {
-      generateUserRequest(currentRequest);
-      
+       const callback2 = (data) => {
+         console.log(data)
+        };
+       const callback1 = (docId) => {
+        getUserRequestLocationData(docId, callback2);
+       }
+       generateUserRequest(currentRequest, callback1);  
   }
 
-  const gridStyles =  {paper: {padding: 10, marginTop: 20, marginBottom:20, height:'100%' }}
+  const gridStyles =  {paper: {padding: 10, marginTop: 20, marginBottom:20, height:'350%' }}
 
   const requestBlood = () => {
     var currentRequest={}
@@ -74,9 +80,11 @@ const ProfilePage = () => {
                   </div>
                 </Paper>
               </Grid>
-              <Grid item sm>
+              <Grid item sm >
                 <Paper style={gridStyles.paper}>
-                        <h1>good</h1>
+                        <MapContainer>
+
+                        </MapContainer>
                 </Paper>
               </Grid>
         </Grid>
