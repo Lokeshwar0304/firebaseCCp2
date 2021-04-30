@@ -13,7 +13,7 @@ var firebaseConfig = {
   messagingSenderId: "621697739059",
   appId: "1:621697739059:web:8a6c3fe1d11046c74f7646"
 };
-const get_base_url= 'https://us-central1-bloodbankasaservice.cloudfunctions.net/get_nearest_service'
+// const get_base_url= 'https://us-central1-bloodbankasaservice.cloudfunctions.net/get_nearest_service'
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
@@ -49,6 +49,7 @@ export const generateUserDocument = async (user,additionalData) => {
   }
   return getUserDocument(user.uid);
 };
+
 const getUserDocument = async uid => {
   if (!uid) return null;
   try {
@@ -62,6 +63,19 @@ const getUserDocument = async uid => {
     console.error("Error fetching user", error);
   }
 };
+
+export const generateUserRequest = async (request,callback) => {
+  if (!request) return;
+
+  firestore.collection("/Requests").add(request).then( function(docRef) 
+  { 
+    callback(docRef.id)
+  }).catch(function(error) {
+    console.error("Error adding document: ", error);
+  });
+};
+
+
 // export const generateUserRequest = async (request) => {
 //   if (!request) return;
 //   // const db= firestore.collection("/Requests");
@@ -80,6 +94,7 @@ const getUserDocument = async uid => {
 //     console.error("Error adding document: ", error);
 //   });
 // };
+<<<<<<< HEAD
 export const generateUserRequest = (request) => {
   if (!request) return;
   firestore.collection("/Requests").add(request)
@@ -104,3 +119,65 @@ export const generateUserRequest = (request) => {
     console.error("Error adding document: ", error);
   });
 };
+=======
+
+
+export const getUserRequestLocationData = ( docId, callback) =>{
+
+  if (!docId) return null;
+  try {
+    console.log(docId)
+    firestore.doc(`NearestServices/${docId}`).onSnapshot( doc =>{
+      if (doc.data()) {
+          callback(doc.data())
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching user", error);
+  }
+ 
+};
+
+
+// export const generateUserRequest = async (request,callback) => {
+//   if (!request) return;
+//   const userRef = firestore.doc(`User/${user.uid}`);
+//   const snapshot = await userRef.get();
+  
+//   if (!snapshot.exists) {
+//     const { email, displayName, photoURL } = user;
+//     try {
+//       await userRef.set({
+//         displayName,
+//         email,
+//         photoURL,
+//         ...additionalData
+//       });
+      
+//     return getUserDocument(user.uid); 
+//     } catch (error) {
+//       console.error("Error creating user document", error);
+//     }
+//   }
+//   return getUserDocument(user.uid);
+// };
+
+
+// function(docRef) {
+//   const body = {fetchId : docRef.id }
+//   fetch(get_base_url, {
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/json',
+//     }
+//     ,body: JSON.stringify(body)
+//       }).then(response =>{
+//         console.log(response.text());
+//       }).then(data =>{
+//         // console.log(data)
+//         console.log(data)
+//       }).catch(error => {
+//         console.log(error)
+//       });
+//     }
+>>>>>>> d6c5bf81a11b0668b9790aa36758998dc7f45b00

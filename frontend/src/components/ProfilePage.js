@@ -8,12 +8,18 @@ import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
 import Icon from '@material-ui/core/Icon';
 import Geolocation from 'react-native-geolocation-service';
+<<<<<<< HEAD
 import { generateUserRequest, requests } from "../firebase";
+=======
+import { generateUserRequest,getUserRequestLocationData } from "../firebase";
+import MapContainer from "./MapContainer";
+>>>>>>> d6c5bf81a11b0668b9790aa36758998dc7f45b00
 
 const ProfilePage = () => {
 
   function processRequest(currentRequest)
   {
+<<<<<<< HEAD
       // generateUserRequest(currentRequest);
      requests.add(currentRequest)
     .then( function(docRef) {
@@ -37,9 +43,18 @@ const ProfilePage = () => {
       console.error("Error adding document: ", error);
     });
       
+=======
+       const callback2 = (data) => {
+         console.log(data)
+        };
+       const callback1 = (docId) => {
+        getUserRequestLocationData(docId, callback2);
+       }
+       generateUserRequest(currentRequest, callback1);  
+>>>>>>> d6c5bf81a11b0668b9790aa36758998dc7f45b00
   }
 
-  const gridStyles =  {paper: {padding: 10, marginTop: 20, marginBottom:20, height:'100%' }}
+  const gridStyles =  {paper: {padding: 10, marginTop: 20, marginBottom:20, height:'350%' }}
 
   const requestBlood = () => {
     var currentRequest={}
@@ -95,9 +110,11 @@ const ProfilePage = () => {
                   </div>
                 </Paper>
               </Grid>
-              <Grid item sm>
+              <Grid item sm >
                 <Paper style={gridStyles.paper}>
-                        <h1>good</h1>
+                        <MapContainer>
+
+                        </MapContainer>
                 </Paper>
               </Grid>
         </Grid>
