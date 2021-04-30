@@ -47,6 +47,7 @@ const ProfilePage = () => {
   const user = useContext(UserContext);
   const { displayName, email,bloodGroup} = user;
   console.log(user)
+  
   return (
         <Grid container>
               <Grid item sm={4}>
