@@ -9,7 +9,7 @@ os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = (
     os.path.abspath(os.getcwd()) + "/key.json"
 )
 
-timeout = 180
+timeout = 300
 project_id = "bloodbankasaservice"
 cred = credentials.Certificate("./key.json")
 default_app = initialize_app(cred)

@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState} from "react";
 import { UserContext } from "../providers/UserProvider";
 import { navigate } from "@reach/router";
 import {auth} from "../firebase";
@@ -12,6 +12,8 @@ import { generateUserRequest,getUserRequestLocationData } from "../firebase";
 import MapContainer from "./MapContainer";
 
 const ProfilePage = () => {
+
+  const [locations, setLocations] = useState([])
 
   function processRequest(currentRequest)
   {
@@ -47,6 +49,34 @@ const ProfilePage = () => {
   const user = useContext(UserContext);
   const { displayName, email,bloodGroup} = user;
   console.log(user)
+
+
+  const grabRequests = () => {
+    setInterval(() => {
+      fetch('https://us-central1-bloodbankasaservice.cloudfunctions.net/polling_request',{
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({blood_group: bloodGroup, user_id: displayName.replace(" ", "")})
+        }).then(response =>{
+            return response.json();
+        }).then(data =>{
+            console.log(data)
+            setLocations([{
+              name: data.victim_id,
+              location: { 
+                        lat: data.latitude,
+                        lng: data.longitude
+                      }
+            }])
+        }).catch(error => {
+            console.log(error)
+        });
+    }, 10000)
+  }
+
+  // grabRequests()
   
   return (
         <Grid container>

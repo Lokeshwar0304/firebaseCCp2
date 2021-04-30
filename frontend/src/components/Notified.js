@@ -20,6 +20,11 @@ const Notified = (props) => {
 
     const [locations, setLocations] = useState([]);
     const [haveData, setHaveData] = useState(false);
+    const [ selected, setSelected ] = useState({});
+
+    const onSelect = item => {
+        setSelected(item);
+      }
 
     let user_id = props.user_id
     let request_id = props.request_id
@@ -61,16 +66,30 @@ const Notified = (props) => {
     }, [user_id, request_id])
 
     const acceptRequest = (event, accepted) => {
+        console.log(JSON.stringify({accepted: accepted, user_id: user_id, request_id: request_id, locations:locations}))
         fetch('https://us-central1-bloodbankasaservice.cloudfunctions.net/get_request_acceptance',{
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({accepted: accepted, user_id: user_id, request_id: request_id})
+        body: JSON.stringify({accepted: accepted, user_id: user_id, request_id: request_id, locations:locations})
         }).then(response =>{
             return response.json();
         }).then(data =>{
-
+            setLocations([...locations, {
+                name: 'Hospital',
+                    location: { 
+                        lat: parseFloat(data.hospital[0]),
+                        lng: parseFloat(data.hospital[1])
+                    }
+            },
+        {
+            name: 'BloodBank',
+                    location: { 
+                        lat: parseFloat(data.bloodBank[0]),
+                        lng: parseFloat(data.bloodBank[1])
+                    }
+        }])
         }).catch(error => {
             console.log(error)
         });
@@ -99,8 +118,9 @@ const Notified = (props) => {
                                 zoom={8}
                                 center={center}>
                                 {
-                                    locations.map(item => <Marker key={item.name} position={item.location} />)
+                                    locations.map(item => <Marker icon={item.name === 'BloodBank' ? 'http://maps.google.com/mapfiles/ms/icons/purple-dot.png' : (item.name === 'Hospital' ? 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png' : (item.name ==='Donor' ? 'http://maps.google.com/mapfiles/ms/icons/green-dot.png': 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'))} title={item.name} key={item.name} position={item.location} />)
                                 }
+                                
                                 </GoogleMap>
                         </Paper>
                     </Grid>

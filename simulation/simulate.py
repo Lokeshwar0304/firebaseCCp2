@@ -52,6 +52,7 @@ with open("close_users", "w") as f:
     f.write("Closest users Listening:\n")
 
 user_stream = user_db.stream()
+number_of_users = number_of_users * len(starts_with)
 for user in user_stream:
     if number_of_users == 0:
         break
@@ -60,12 +61,17 @@ for user in user_stream:
         user_dict
         and "displayName" in user_dict
         and user_dict["displayName"]
-        and user_dict["displayName"][0].lower() == starts_with
+        and user_dict["displayName"][0].lower() in starts_with
         and all(ord(char) < 128 for char in user_dict["displayName"])
     ):
         user_dict["user_id"] = user.id
         user_dicts.append(user_dict)
         number_of_users -= 1
+
+subscriber = pubsub_v1.SubscriberClient()
+existing_subs = subscriber.list_subscriptions(
+    request={"project": f"projects/{project_id}"}
+)
 
 
 def subscribe(i, user_dicts):
@@ -81,7 +87,8 @@ def subscribe(i, user_dicts):
         topic_name = f"projects/{project_id}/topics/{topic}"
         sub_name = f"projects/{project_id}/subscriptions/{user_dict['displayName'].replace(' ', '_')+ '_generic'}"
     subscriber = pubsub_v1.SubscriberClient()
-    # subscriber.create_subscription(request={"name": sub_name, "topic": topic_name})
+    if sub_name in existing_subs:
+        subscriber.create_subscription(request={"name": sub_name, "topic": topic_name})
     streaming_pull_future = subscriber.subscribe(
         sub_name, callback=lambda msg: callback(msg, user_dict)
     )

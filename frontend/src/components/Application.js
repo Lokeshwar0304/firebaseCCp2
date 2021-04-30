@@ -15,11 +15,11 @@ function Application() {
       //   <ProfilePage />
       // :
         <Router>
-          <SignUp path="signUp" />
-          <SignIn path="/" />
+          <SignUp path="/signUp" />
+          {user ? (<ProfilePage path="/" />) : (<SignIn path="/" />)}
           <Emergency path='/emergency'/>
           <Notified path="/notified/:user_id/:request_id"/>
-          <PasswordReset path = "passwordReset" />
+          <PasswordReset path = "/passwordReset" />
         </Router>
 
       
