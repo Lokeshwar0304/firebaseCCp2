@@ -1,0 +1,9 @@
+Flask
+werkzeug.utils
+firebase_admin
+flask_cors
+PIL
+facenet_pytorch
+tensorflow
+pickle
+shutil

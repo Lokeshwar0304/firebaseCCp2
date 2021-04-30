@@ -1,0 +1,5 @@
+runtime: python37
+
+# backend
+- url: /.*
+  script: auto
