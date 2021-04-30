@@ -26,8 +26,9 @@ def callback(message, user):
     if distance < 300:
         with open("close_users", "a") as f:
             f.write(
-                f"{user['user_id']} ({user['displayName']}) -> {blood_request.victim_id} : {str(distance)}\n"
+                f"{distance} : http://localhost:3000/notified/{user['user_id']}/{blood_request.blood_group}~{blood_request.victim_id}\n"
             )
+
     message.ack()
 
 
@@ -55,8 +56,12 @@ for user in user_stream:
     if number_of_users == 0:
         break
     user_dict = user.to_dict()
-    if user_dict["displayName"][0].lower() == starts_with and all(
-        ord(char) < 128 for char in user_dict["displayName"]
+    if (
+        user_dict
+        and "displayName" in user_dict
+        and user_dict["displayName"]
+        and user_dict["displayName"][0].lower() == starts_with
+        and all(ord(char) < 128 for char in user_dict["displayName"])
     ):
         user_dict["user_id"] = user.id
         user_dicts.append(user_dict)
@@ -76,7 +81,7 @@ def subscribe(i, user_dicts):
         topic_name = f"projects/{project_id}/topics/{topic}"
         sub_name = f"projects/{project_id}/subscriptions/{user_dict['displayName'].replace(' ', '_')+ '_generic'}"
     subscriber = pubsub_v1.SubscriberClient()
-    subscriber.create_subscription(request={"name": sub_name, "topic": topic_name})
+    # subscriber.create_subscription(request={"name": sub_name, "topic": topic_name})
     streaming_pull_future = subscriber.subscribe(
         sub_name, callback=lambda msg: callback(msg, user_dict)
     )

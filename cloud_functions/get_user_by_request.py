@@ -1,17 +1,15 @@
 # https://us-central1-bloodbankasaservice.cloudfunctions.net/get_user_by_request
 
-from firebase_admin import credentials, firestore, initialize_app
-import redis
-import math
-import json
-import datetime
+from google.api_core import retry
 from google.cloud import pubsub_v1
-import os
+import os, json, math, redis, datetime
+from firebase_admin import credentials, firestore, initialize_app
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = (
     os.path.abspath(os.getcwd()) + "/key.json"
 )
 
+timeout = 180
 project_id = "bloodbankasaservice"
 cred = credentials.Certificate("./key.json")
 default_app = initialize_app(cred)
@@ -35,7 +33,7 @@ class Blood_Request:
 # TODO need to update the face_signature
 def find_victim(face_signature: str):
     # TODO match the face
-    victim_id = "7HWiG7KSSjRhfzNYkcQ7tJDZisP2"
+    victim_id = "0zKW8LM7Vfhc8EODUnjM"
     doc = user.document(victim_id).get().to_dict()
     blood_group = doc["bloodGroup"]
     return victim_id, blood_group
@@ -68,7 +66,7 @@ def get_within_radius(old_latitude, old_longitude, new_latitude, new_longitude):
 
 
 def check_duplicate_request(blood_request: Blood_Request):
-    key = f"{blood_request.victim_id}${blood_request.blood_group}"
+    key = f"{blood_request.blood_group}~{blood_request.victim_id}"
     value = redis_client.get(key)
     if not value:
         return False
@@ -77,9 +75,15 @@ def check_duplicate_request(blood_request: Blood_Request):
     within_radius = get_within_radius(
         old.latitude, old.longitude, blood_request.latitude, blood_request.longitude
     )
-    if time_diff < 15 and within_radius < 2:
+    if time_diff < timeout / 60 and within_radius < 2:
         return True
     return False
+
+
+def clear_cache(blood_request: Blood_Request):
+    key = f"{blood_request.blood_group}~{blood_request.victim_id}"
+    redis_client.delete(key)
+    return True
 
 
 # TODO error handling
@@ -87,24 +91,70 @@ def push_request_to_queue(blood_request: Blood_Request):
     topic = f"{ blood_request.blood_group.lower() }blood_group"
     publisher = pubsub_v1.PublisherClient()
     topic_name = f"projects/{project_id}/topics/{topic}"
+    generic_topic_name = f"projects/{project_id}/topics/generic_blood_group"
     message = json.dumps(blood_request.__dict__)
     future = publisher.publish(topic_name, str.encode(message))
+    future.result()
+    future = publisher.publish(generic_topic_name, str.encode(message))
     future.result()
     return True
 
 
 # TODO error handling
 def update_cache(blood_request: Blood_Request):
-    key = f"{blood_request.victim_id}${blood_request.blood_group}"
+    key = f"{blood_request.blood_group}~{blood_request.victim_id}"
     redis_client.set(key, json.dumps(blood_request.__dict__))
     return True
 
 
 # TODO error handling
 def update_storage(blood_request: Blood_Request):
-    key = f"{blood_request.victim_id}${blood_request.blood_group}"
+    key = f"{blood_request.blood_group}~{blood_request.victim_id}"
     request.document(key).set(blood_request.__dict__)
     return True
+
+
+def create_topic(blood_request: Blood_Request):
+    topic_id = f"{blood_request.blood_group}~{blood_request.victim_id}"
+    publisher = pubsub_v1.PublisherClient()
+    topic_path = publisher.topic_path(project_id, topic_id)
+    topic = publisher.create_topic(request={"name": topic_path})
+    return topic.name
+
+
+def delete_topic(blood_request: Blood_Request, topic_path: str):
+    publisher = pubsub_v1.PublisherClient()
+    publisher.delete_topic(request={"topic": topic_path})
+    clear_cache(blood_request)
+    return True
+
+
+def listen_topic(blood_request: Blood_Request, topic_path: str):
+    subscriber = pubsub_v1.SubscriberClient()
+    subscription_path = subscriber.subscription_path(
+        project_id, f"{blood_request.blood_group}~{blood_request.victim_id}"
+    )
+    subscriber.create_subscription(
+        request={"name": subscription_path, "topic": topic_path}
+    )
+    final_response = "No donor is ready :("
+    with subscriber:
+        response = subscriber.pull(
+            request={"subscription": subscription_path, "max_messages": 1},
+            retry=retry.Retry(deadline=180),
+        )
+        ack_ids = []
+        if response.received_messages:
+            received_message = response.received_messages[0]
+            ack_ids.append(received_message.ack_id)
+            subscriber.acknowledge(
+                request={"subscription": subscription_path, "ack_ids": ack_ids}
+            )
+            name, email = received_message.message.data.decode("utf-8").split("~")
+            final_response = f"{name} wants to donate! His email is {email}"
+        delete_topic(blood_request, topic_path)
+        subscriber.delete_subscription(request={"subscription": subscription_path})
+        return final_response
 
 
 def response(message):
@@ -161,18 +211,24 @@ def got_blood_request(request):
     if check_duplicate_request(blood_request):
         return response("Victim was already takencare of.")
 
+    # TODO create topic for the request
+    topic_path = create_topic(blood_request)
     queue_success = push_request_to_queue(blood_request)
     if queue_success:
         cache_success = update_cache(blood_request)
         if cache_success:
             storage_success = update_storage(blood_request)
             if storage_success:
-                return response("You are a saviour! Help is on the way.")
+                payload = listen_topic(blood_request, topic_path)
+                return response(payload)
             else:
                 # need to revert
+                delete_topic(blood_request, topic_path)
                 return response("Storing failed!")
         else:
             # need to revert
+            delete_topic(blood_request, topic_path)
             return response("Caching failed!")
     else:
+        delete_topic(blood_request, topic_path)
         return response("Raising request failed!")
