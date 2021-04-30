@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import { Button, Grid, Typography, CircularProgress } from '@material-ui/core';
+import { Button, Grid, Typography, CircularProgress, TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Geolocation from 'react-native-geolocation-service';
 
@@ -16,6 +16,7 @@ function Emergency() {
   const classes = useStyles()
   const [notification, setNotification] = useState('Time to be a hero');
   const [progress, setProgress] = useState(false)
+  const [victim, setVictim] = useState('')
 
   const putBloodRequest = (event)=>{
     setProgress(true)
@@ -24,7 +25,7 @@ function Emergency() {
         const body = {
           anonymous: true,
           face_signature: null,
-          victim_id: null,
+          victim_id: victim,
           timestamp: new Date().getTime(),
           latitude: position.coords.latitude,
           longitude: position.coords.longitude
@@ -61,6 +62,9 @@ function Emergency() {
 
   return (
     <Grid container justify="center" alignItems="center" direction="column" style={{ minHeight: '100vh' }}>
+      <TextField value={victim} className={classes.root} onChange={(e) => {
+        setVictim(e.currentTarget.value)
+      }}></TextField>
         <Button variant="contained" className={classes.root} size="large" color="secondary" onClick = {(event) => {putBloodRequest(event)}}>
           Emergency!
         </Button>

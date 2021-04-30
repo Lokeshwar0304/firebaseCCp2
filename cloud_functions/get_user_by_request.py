@@ -31,9 +31,9 @@ class Blood_Request:
 
 
 # TODO need to update the face_signature
-def find_victim(face_signature: str):
+def find_victim(victim_id, face_signature: str):
     # TODO match the face
-    victim_id = "0zKW8LM7Vfhc8EODUnjM"
+    # victim_id = "0zKW8LM7Vfhc8EODUnjM"
     doc = user.document(victim_id).get().to_dict()
     blood_group = doc["bloodGroup"]
     return victim_id, blood_group
@@ -188,7 +188,7 @@ def got_blood_request(request):
     print(request)
     request_json = request.get_json()
     print(request_json)
-    victim_id = None
+    victim_id = request_json["victim_id"]
     blood_group = None
     timestamp = request_json["timestamp"]
     latitude = request_json["latitude"]
@@ -196,7 +196,7 @@ def got_blood_request(request):
 
     if request_json["anonymous"]:
         face_signature = request_json["face_signature"]
-        victim_id, blood_group = find_victim(face_signature)
+        victim_id, blood_group = find_victim(victim_id, face_signature)
     else:
         victim_id = request_json["victim_id"]
         blood_group = request_json["blood_type"]
