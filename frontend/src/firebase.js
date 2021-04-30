@@ -94,32 +94,6 @@ export const generateUserRequest = async (request,callback) => {
 //     console.error("Error adding document: ", error);
 //   });
 // };
-<<<<<<< HEAD
-export const generateUserRequest = (request) => {
-  if (!request) return;
-  firestore.collection("/Requests").add(request)
-  .then( function(docRef) {
-      const body = {fetchId : docRef.id }
-      fetch(get_base_url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-        ,body: JSON.stringify(body)
-          }).then(response =>{
-            console.log(response.json());
-          }).then(data =>{
-            // console.log(data)
-            console.log(data)
-          }).catch(error => {
-            console.log(error)
-          });
-        })
-  .catch(function(error) {
-    console.error("Error adding document: ", error);
-  });
-};
-=======
 
 
 export const getUserRequestLocationData = ( docId, callback) =>{
@@ -180,4 +154,3 @@ export const getUserRequestLocationData = ( docId, callback) =>{
 //         console.log(error)
 //       });
 //     }
->>>>>>> d6c5bf81a11b0668b9790aa36758998dc7f45b00

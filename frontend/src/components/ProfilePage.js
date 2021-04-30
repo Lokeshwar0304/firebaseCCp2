@@ -8,12 +8,8 @@ import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
 import Icon from '@material-ui/core/Icon';
 import Geolocation from 'react-native-geolocation-service';
-<<<<<<< HEAD
-import { generateUserRequest, requests } from "../firebase";
-=======
 import { generateUserRequest,getUserRequestLocationData } from "../firebase";
 import MapContainer from "./MapContainer";
->>>>>>> d6c5bf81a11b0668b9790aa36758998dc7f45b00
 
 const ProfilePage = () => {
 
@@ -23,31 +19,6 @@ const ProfilePage = () => {
       // generateUserRequest(currentRequest);
      requests.add(currentRequest)
     .then( function(docRef) {
-        const body = {fetchId : docRef.id }
-        fetch('https://us-central1-bloodbankasaservice.cloudfunctions.net/get_nearest_service', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          }
-          ,body: JSON.stringify(body)
-            }).then(response =>{
-              console.log(response.json());
-            }).then(data =>{
-              // console.log(data)
-              console.log(data)
-            }).catch(error => {
-              console.log(error)
-            });
-          })
-    .catch(function(error) {
-      console.error("Error adding document: ", error);
-    });
-      
-=======
-       const callback2 = (data) => {
-         console.log(data)
-        };
-       const callback1 = (docId) => {
         getUserRequestLocationData(docId, callback2);
        }
        generateUserRequest(currentRequest, callback1);  
@@ -55,7 +26,6 @@ const ProfilePage = () => {
   }
 
   const gridStyles =  {paper: {padding: 10, marginTop: 20, marginBottom:20, height:'350%' }}
-
   const requestBlood = () => {
     var currentRequest={}
     Geolocation.getCurrentPosition(
