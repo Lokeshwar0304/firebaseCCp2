@@ -218,7 +218,7 @@ const SignUp = () => {
     else if (name === "userContact") {
       setErrors({userContact:""})
       setContact(value);
-      if(value.length!=10){
+      if(value.length!==10){
         setErrors({userContact:"Phone number should be 10 digits"})
       }
     }
@@ -333,17 +333,18 @@ const SignUp = () => {
 
               {(isBloodBank|| isHospital||isUser) && (
               <Grid item xs={12}>
-              <TextField
-              fullWidth
-              required
-              id="outlined-required"
-              label="Name"
-              variant="outlined"
-              name="displayName"
-              value={displayName}
-              error={errors.displayName}
-              helperText={errors.displayName}
-              onChange={event => onChangeHandler(event)}
+                <TextField
+                  fullWidth
+                  required
+                  id="outlined"
+                  required
+                  label="Name"
+                  variant="outlined"
+                  name="displayName"
+                  value={displayName}
+                  error={errors.displayName}
+                  helperText={errors.displayName}
+                  onChange={event => onChangeHandler(event)}
               />
               </Grid> )}
               <Grid item xs={12}>
