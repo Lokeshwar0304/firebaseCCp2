@@ -15,17 +15,17 @@ const ProfilePage = () => {
 
   function processRequest(currentRequest)
   {
-       const callback2 = (data) => {
-         console.log(data)
-        };
-       const callback1 = (docId) => {
+<<<<<<< HEAD
+      // generateUserRequest(currentRequest);
+     requests.add(currentRequest)
+    .then( function(docRef) {
         getUserRequestLocationData(docId, callback2);
        }
        generateUserRequest(currentRequest, callback1);  
+>>>>>>> d6c5bf81a11b0668b9790aa36758998dc7f45b00
   }
 
   const gridStyles =  {paper: {padding: 10, marginTop: 20, marginBottom:20, height:'350%' }}
-
   const requestBlood = () => {
     var currentRequest={}
     Geolocation.getCurrentPosition(
