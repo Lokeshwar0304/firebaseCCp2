@@ -8,13 +8,34 @@ import Button from '@material-ui/core/Button';
 import { makeStyles } from '@material-ui/core/styles';
 import Icon from '@material-ui/core/Icon';
 import Geolocation from 'react-native-geolocation-service';
-import { generateUserRequest } from "../firebase";
+import { generateUserRequest, requests } from "../firebase";
 
 const ProfilePage = () => {
 
   function processRequest(currentRequest)
   {
-      generateUserRequest(currentRequest);
+      // generateUserRequest(currentRequest);
+     requests.add(currentRequest)
+    .then( function(docRef) {
+        const body = {fetchId : docRef.id }
+        fetch('https://us-central1-bloodbankasaservice.cloudfunctions.net/get_nearest_service', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+          ,body: JSON.stringify(body)
+            }).then(response =>{
+              console.log(response.json());
+            }).then(data =>{
+              // console.log(data)
+              console.log(data)
+            }).catch(error => {
+              console.log(error)
+            });
+          })
+    .catch(function(error) {
+      console.error("Error adding document: ", error);
+    });
       
   }
 

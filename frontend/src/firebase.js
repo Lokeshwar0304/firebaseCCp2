@@ -17,10 +17,11 @@ const get_base_url= 'https://us-central1-bloodbankasaservice.cloudfunctions.net/
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
+
 export const auth = firebase.auth();
 export const firestore = firebase.firestore();
 export const storage = firebase.storage();
-export const get_user_by_request = firebase.functions().httpsCallable('get_user_by_request');
+export const requests = firestore.collection("/Requests");
 
 const provider = new firebase.auth.GoogleAuthProvider();
 export const signInWithGoogle = () => {
@@ -91,7 +92,7 @@ export const generateUserRequest = (request) => {
         }
         ,body: JSON.stringify(body)
           }).then(response =>{
-            console.log(response.text());
+            console.log(response.json());
           }).then(data =>{
             // console.log(data)
             console.log(data)
