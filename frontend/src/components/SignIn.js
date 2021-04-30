@@ -44,6 +44,7 @@ const SignIn = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState(null);
+    const [errors, setErrors] = useState(null);
 
     const [requestMessage, setRequestMessage] = useState('');
 
@@ -92,12 +93,13 @@ const SignIn = () => {
         
         event.preventDefault();
         
-        auth.signInWithEmailAndPassword(email, password).then(() => {
+        auth.signInWithEmailAndPassword(email, password)
+        // .then(() => {
 
-          setSignedIn(true);
-          
-          
-          }).catch(error => {
+        //   setSignedIn(true);
+               
+        //   })
+          .catch(error => {
         setError("Error signing in with password and email!");
           console.error("Error signing in with password and email", error);
         });
@@ -108,10 +110,20 @@ const SignIn = () => {
           const {name, value} = event.currentTarget;
         
           if(name === 'userEmail') {
+              setErrors({userEmail:""})
               setEmail(value);
+              const emailPattern = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+              console.log(emailPattern.test(value))
+              if (!emailPattern.test(value)) {
+                setErrors({userEmail:"Email is not valid"})
+              }
           }
           else if(name === 'userPassword'){
+            setErrors({userPassword:""})
             setPassword(value);
+            if(value.length<1){
+              setErrors({userPassword:"password should not be null"})
+            }
           }
       };
    
@@ -136,6 +148,8 @@ const SignIn = () => {
             name="userEmail"
             value = {email}
             autoFocus
+            // error = {errors.userEmail}  
+            // helperText = {errors.userEmail}
             onChange = {(event) => onChangeHandler(event)}
           />
           <TextField
@@ -149,6 +163,8 @@ const SignIn = () => {
             autoComplete="current-password"
             name="userPassword"
             value = {password}
+            // error={errors.userPassword} 
+            // helperText={errors.userPassword}
             onChange = {(event) => onChangeHandler(event)}
           />
           <FormControlLabel

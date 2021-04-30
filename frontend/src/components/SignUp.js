@@ -33,6 +33,7 @@ import NativeSelect from '@material-ui/core/NativeSelect';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from "@material-ui/core/MenuItem";
 
+
 const SignUp = () => {
 
   
@@ -87,6 +88,7 @@ const SignUp = () => {
   const [image, setImage] = useState(null);
   const [url, setUrl] = useState("");
   const [progress, setProgress] = useState(0);
+  const [errors,setErrors]=useState("")
 
 
   const [bloodGroupQuan, setbloodGroupQuan] = useState([
@@ -191,29 +193,63 @@ const SignUp = () => {
   const onChangeHandler = event => {
     const { name, value } = event.currentTarget;
     if (name === "userEmail") {
+      setErrors({userEmail:""})
       setEmail(value);
-    } else if (name === "userPassword") {
+      const emailPattern = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      console.log(emailPattern.test(value))
+      if (!emailPattern.test(value)) {
+        setErrors({userEmail:"Email is not valid"})
+      }
+    } 
+    else if (name === "userPassword") {
+      setErrors({userPassword:""})
       setPassword(value);
-    } else if (name === "displayName") {
+      if(value.length<1){
+        setErrors({userPassword:"password should not be null"})
+      }
+    }
+    else if (name === "displayName") {
+      setErrors({displayName:""})
       setDisplayName(value);
-    }else if (name === "userContact") {
+      if(value.length<5){
+        setErrors({displayName:"DisplayName should be atleast 5 chars"})
+      }
+    }
+    else if (name === "userContact") {
+      setErrors({userContact:""})
       setContact(value);
-    }else if(name ==="isUser"){
+      if(value.length!==10){
+        setErrors({userContact:"Phone number should be 10 digits"})
+      }
+    }
+    else if(name ==="isUser"){
       setUserChecked(!isUser)
       setHospitalChecked(false)
       setBloodBankChecked(false)
-    }else if(name ==="isHospital"){
+    }
+    else if(name ==="isHospital"){
       setHospitalChecked(!isHospital)
       setBloodBankChecked(false)
       setUserChecked(false)
-    }else if(name ==="isBloodBank"){
+    }
+    else if(name ==="isBloodBank"){
       setBloodBankChecked(!isBloodBank)
       setHospitalChecked(false)
       setUserChecked(false)
-    }else if(name ==="firstName"){
-      setFirstName(value)
-    }else if(name === "lastName"){
-      setLastName(value)
+    }
+    else if(name ==="firstName"){
+      setErrors({firstName:""})
+      setFirstName(value);
+      if(value.length<5){
+        setErrors({firstName:"length should be atleast 5"})
+      }
+    }
+    else if(name === "lastName"){
+      setErrors({lastName:""})
+      setLastName(value);
+      if(value.length<5){
+        setErrors({lastName:"length should be atleast 5"})
+      }
     }
     
   };
@@ -274,6 +310,8 @@ const SignUp = () => {
                   label="First Name"
                   autoFocus
                   value={firstName}
+                  error={errors.firstName}
+                  helperText={errors.firstName}
                   onChange={event => onChangeHandler(event)}
                 />
               </Grid>
@@ -287,21 +325,26 @@ const SignUp = () => {
                   name="lastName"
                   autoComplete="lname"
                   value={lastName}
+                  error={errors.lastName}
+                  helperText={errors.lastName}
                   onChange={event => onChangeHandler(event)}
                 />
               </Grid> </Grid>)}
 
               {(isBloodBank|| isHospital||isUser) && (
               <Grid item xs={12}>
-              <TextField
-              fullWidth
-              required
-              id="outlined-required"
-              label="Name"
-              variant="outlined"
-              name="displayName"
-              value={displayName}
-              onChange={event => onChangeHandler(event)}
+                <TextField
+                  fullWidth
+                  required
+                  id="outlined"
+                  required
+                  label="Name"
+                  variant="outlined"
+                  name="displayName"
+                  value={displayName}
+                  error={errors.displayName}
+                  helperText={errors.displayName}
+                  onChange={event => onChangeHandler(event)}
               />
               </Grid> )}
               <Grid item xs={12}>
@@ -314,6 +357,8 @@ const SignUp = () => {
                   name="userEmail"
                   autoComplete="email"
                   value={email}
+                  error={errors.userEmail}
+                  helperText={errors.userEmail}
                   onChange={event => onChangeHandler(event)}
                 />
               </Grid>
@@ -328,11 +373,15 @@ const SignUp = () => {
                   id="password"
                   autoComplete="current-password"
                   value={password}
+                  error={errors.userPassword}
+                  helperText={errors.userPassword}
                   onChange={event => onChangeHandler(event)}
                 />
               </Grid>
               <Grid item xs={12}>
-              <MuiPhoneNumber variant="outlined" fullWidth required label="Contact Number" defaultCountry={'us'} value={contact} name="userContact" onChange={setContact}/>
+              <MuiPhoneNumber variant="outlined" fullWidth required label="Contact Number" defaultCountry={'us'} value={contact} name="userContact"
+                                error={errors.userContact}
+                                helperText={errors.userContact} onChange={setContact}/>
               </Grid>
               
               { isUser && (
